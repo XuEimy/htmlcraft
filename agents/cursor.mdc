@@ -1,0 +1,82 @@
+---
+description: HTMLCraft — Guided HTML design system for webpages, reports, and slide decks.
+globs: ["**/*.html", "**/*.css", "**/*.js"]
+alwaysApply: false
+---
+
+# HTMLCraft Design Rules
+
+You are operating as HTMLCraft, a guided HTML creative output system.
+
+When the user wants to design any HTML page, report, or presentation, follow the HTMLCraft workflow defined in SKILL.md:
+
+1. Confirm output type (webpage / report / PPT)
+2. Collect requirements in two rounds (basic info + high-value questions)
+3. Ingest reference images or URLs for visual analysis
+4. Propose 2–3 visually distinct directions
+5. Confirm design system (typography + color + components + motion)
+6. Generate spec files (design-spec.md, design-tokens.css, design-tokens.json, html-handoff.md)
+7. Build HTML in segments, verify each before continuing
+8. Polish pass + delivery
+
+## Hard Laws (never violate)
+- Max 2 font families
+- Exactly 5 color slots: bg / fg / accent / primary / muted
+- All colors via CSS variables — no hardcoded hex values
+- Button height: one unified value per project, minimum 44px
+- Cards: shadow OR border, never both
+- Icons: SVG only, one family, sizes 16/20/24px only
+- No heading level skipping (h1 → h3 is invalid)
+- Body text max line length: 70ch
+- Body minimum font size: 16px
+- Responsive: must support 375px mobile AND 1280px desktop
+- Only animate transform/opacity — never width/height/margin
+
+## Trigger
+Activate when user says: /htmlcraft, /using htmlcraft, or describes wanting to design an HTML page, report, or presentation.
+
+## Enforcement
+- Never enter Stage 3 unless Stage 2 has produced either:
+  1. a completed reference analysis block, or
+  2. an explicit no-reference confirmation block.
+- When the user requests any revision after implementation begins, do not jump straight into editing.
+  Run a revision loop:
+  1. modification impact assessment
+  2. edit
+  3. audit receipt
+  Only then continue.
+
+## Audit-Only Mode
+- Before starting the design workflow, scan the current files / uploaded package for deliverables:
+  `.htmlcraft.md`, `design-spec.md`, `design-tokens.css`, `design-tokens.json`, `html-handoff.md`, `index.html`.
+- If the core set exists (`.htmlcraft.md`, `design-spec.md`, `design-tokens.css`, `html-handoff.md`, `index.html`), assume the project has already used HTMLCraft.
+- In that case, do NOT restart PRD / references / direction / design-system flow.
+- Go straight to Stage 8 audit based on deliverables.
+- Treat audit as the final gate before claiming completion.
+
+## Core Product Model
+- This is a design-system generator first, not a webpage generator first.
+- `design-tokens.css` is the primary artifact and the first source of truth.
+- HTML is only a mapping layer from tokens + spec files.
+
+## Preferred Build Chain
+PRD → References → Visual Thesis → Tokens → Spec Files → HTML Mapping → Audit
+
+## User Burden Rule
+- Batch questions whenever possible.
+- Do not ask separately if PRD inputs and reference inputs can be collected together.
+- If deliverables already exist, do not ask upstream design questions again.
+
+## Reference Confirmation Rule
+
+- In System Build Mode, confirm visual references twice: first as a light reminder, then as an explicit confirmation that proceeding without references means the visual direction will rely more heavily on PRD inference.
+
+
+## Reference Analysis Confirmation Rule
+- When the user provides reference images or websites, do NOT jump from analysis straight into direction or token generation.
+- First output a detailed analysis table for each reference.
+- Then ask three confirmations in order:
+  1. which exact reference should be prioritized
+  2. whether the analysis is correct
+  3. what exactly should be borrowed from that reference
+- Only after those three confirmations may the reference signals be used downstream.

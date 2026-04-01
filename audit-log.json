@@ -1,0 +1,33 @@
+{
+  "project_id": "htmlcraft-project-001",
+  "project_name": "My HTMLCraft Project",
+  "branch": "main",
+  "scenario_hint": "",
+  "current_scope": "",
+  "current_page": "home",
+  "revision_count_since_full_audit": 0,
+  "last_full_audit_at": "",
+  "last_changed_scope": "",
+  "last_changed_files": [],
+  "open_issues": [],
+  "resolved_issues": [],
+  "drift_status_by_layer": {
+    "visual_thesis": "stable",
+    "tokens": "stable",
+    "structure": "stable",
+    "components": "stable",
+    "cross_page": "stable",
+    "context": "stable"
+  },
+  "next_llm_scope": {
+    "must_read": [
+      "design-tokens.css",
+      ".htmlcraft.md",
+      "design-spec.md",
+      "html-handoff.md",
+      "index.html"
+    ],
+    "allowed": [],
+    "forbidden": []
+  }
+}

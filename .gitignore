@@ -1,0 +1,5 @@
+.DS_Store
+.claude/settings.local.json
+references/.DS_Store
+references/pretext/node_modules/
+*.log

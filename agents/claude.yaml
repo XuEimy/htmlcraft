@@ -1,0 +1,8 @@
+interface:
+  display_name: "HTMLCraft"
+  short_description: "Guided HTML design system: webpages, reports, and slide decks with aesthetic precision"
+  default_prompt: "Use /htmlcraft to help me design an HTML page through reference intake, direction choices, PRD confirmation, and step-by-step design decisions before generating code."
+  model_compatibility:
+    - claude-opus-4
+    - claude-sonnet-4-5
+    - claude-haiku-4-5

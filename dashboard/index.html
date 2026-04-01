@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTMLCraft Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   HTMLCraft Dashboard — Design Tokens
+   视觉方向：暖米色底 + 大圆角无 shadow 卡片 + 品牌大字 + 琥珀 accent
+   ═══════════════════════════════════════ */
+:root {
+  /* ─── 字体 ─── */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* ─── 颜色 ─── */
+  --color-bg:           #e8e4de;   /* 暖米色底——整个页面的地基 */
+  --color-surface:      #f5f2ee;   /* 卡片背景——比底色浅，无 shadow 靠对比分层 */
+  --color-surface-2:    #ffffff;   /* 嵌套卡片、高亮区域 */
+  --color-border:       #d8d3cc;   /* 分割线、轻边框 */
+  --color-text:         #1c1917;   /* 主文字——近黑 */
+  --color-muted:        #78716c;   /* 辅助文字 */
+  --color-faint:        #a8a29e;   /* 极弱文字、placeholder */
+
+  /* accent：琥珀橙——来自 logo.svg */
+  --color-accent:       #c45a1c;
+  --color-accent-bg:    #fdf0e8;
+  --color-accent-light: #f5c9a8;
+
+  /* 状态色 */
+  --color-done:         #15803d;
+  --color-done-bg:      #f0fdf4;
+  --color-active:       #1d4ed8;
+  --color-active-bg:    #eff6ff;
+  --color-pending:      #a8a29e;
+  --color-fail:         #dc2626;
+  --color-fail-bg:      #fef2f2;
+  --color-warn:         #d97706;
+  --color-warn-bg:      #fffbeb;
+
+  /* ─── 圆角 ─── */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   20px;
+  --radius-xl:   24px;
+  --radius-pill: 999px;
+
+  /* ─── 间距 ─── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+
+  /* ─── 动效 ─── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-mid:  250ms;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+  font-size: 16px;
+  min-height: 100vh;
+}
+
+/* ─── Layout ─── */
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+  gap: var(--space-4);
+}
+.header-left { flex: 1; min-width: 0; }
+.header-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-faint);
+  margin-bottom: 4px;
+}
+.header-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-text);
+  text-wrap: balance;
+}
+.header-title span {
+  color: var(--color-accent);
+}
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.connected    { background: var(--color-done); box-shadow: 0 0 0 2px #bbf7d0; }
+.status-dot.disconnected { background: var(--color-faint); }
+.status-label { font-size: 11px; font-weight: 600; color: var(--color-muted); }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  transition: all var(--dur-fast) var(--ease-out);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-btn.active {
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ─── Card ─── */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+.card-sm {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+.card-subtitle {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-bottom: var(--space-4);
+}
+
+/* ─── Inner card (nested) ─── */
+.inner-card {
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+/* ─── Pill / Badge ─── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.pill-done    { background: var(--color-done-bg);   color: var(--color-done);   border-color: #bbf7d0; }
+.pill-active  { background: var(--color-active-bg); color: var(--color-active); border-color: #bfdbfe; }
+.pill-pending { background: var(--color-surface-2); color: var(--color-faint);  border-color: var(--color-border); }
+.pill-pass    { background: var(--color-done-bg);   color: var(--color-done);   border-color: #bbf7d0; }
+.pill-fail    { background: var(--color-fail-bg);   color: var(--color-fail);   border-color: #fecaca; }
+.pill-warn    { background: var(--color-warn-bg);   color: var(--color-warn);   border-color: #fde68a; }
+.pill-accent  { background: var(--color-accent-bg); color: var(--color-accent); border-color: var(--color-accent-light); }
+.pill-locked  { background: var(--color-surface-2); color: var(--color-muted);  border-color: var(--color-border); }
+
+/* ─── Row ─── */
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.row:last-child { border-bottom: none; }
+.row-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+  border: 1.5px solid;
+}
+.row-content { flex: 1; min-width: 0; }
+.row-label { font-size: 13px; font-weight: 600; }
+.row-note  { font-size: 11px; color: var(--color-muted); margin-top: 2px; }
+
+/* ─── Token Row ─── */
+.token-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-3);
+}
+.token-row:last-child { border-bottom: none; }
+.token-name {
+  font-size: 12px;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.token-value {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  background: var(--color-bg);
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.color-swatch {
+  width: 16px; height: 16px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+/* ─── Progress ─── */
+.progress-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-accent);
+  transition: width 0.4s var(--ease-out);
+}
+
+/* ═══════════════════════════════════════
+   OVERVIEW TAB
+   ═══════════════════════════════════════ */
+
+/* Hero */
+.overview-hero {
+  padding: var(--space-7) var(--space-5) var(--space-6);
+  text-align: center;
+}
+.overview-hero-title {
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin-bottom: var(--space-4);
+  text-wrap: balance;
+}
+.overview-hero-title em {
+  font-style: normal;
+  color: var(--color-accent);
+}
+.overview-hero-desc {
+  font-size: 16px;
+  color: var(--color-muted);
+  max-width: 56ch;
+  margin: 0 auto;
+  line-height: 1.65;
+  text-wrap: balance;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-4);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.stat-item {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+}
+.stat-num {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.stat-num span { color: var(--color-accent); }
+.stat-label {
+  font-size: 11px;
+  color: var(--color-muted);
+  font-weight: 600;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.stat-divider {
+  width: 1px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+/* Output types */
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.type-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+}
+.type-card-icon {
+  font-size: 22px;
+  margin-bottom: var(--space-3);
+  display: block;
+}
+.type-card-name {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+  letter-spacing: -0.01em;
+}
+.type-card-desc {
+  font-size: 12px;
+  color: var(--color-muted);
+  line-height: 1.55;
+}
+.type-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: var(--space-3);
+}
+.tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+  color: var(--color-muted);
+  letter-spacing: 0.02em;
+}
+
+/* 2-col grid */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* Timeline */
+.timeline {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  -webkit-overflow-scrolling: touch;
+}
+.timeline-item {
+  flex: 1;
+  min-width: 72px;
+  text-align: center;
+  padding: var(--space-3) var(--space-2);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  transition: background var(--dur-fast);
+  cursor: default;
+}
+.timeline-item.stage-done {
+  background: var(--color-done-bg);
+}
+.timeline-item.stage-active {
+  background: var(--color-accent-bg);
+  outline: 1.5px solid var(--color-accent-light);
+}
+.timeline-num {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-muted);
+  line-height: 1;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.timeline-item.stage-done .timeline-num   { color: var(--color-done); }
+.timeline-item.stage-active .timeline-num { color: var(--color-accent); }
+.timeline-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+/* Design laws grid */
+.law-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+.law-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  padding: 8px var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  line-height: 1.4;
+}
+.law-char {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+/* Deliverable files */
+.file-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+.file-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+}
+.file-role {
+  font-size: 11px;
+  color: var(--color-muted);
+  text-align: right;
+}
+
+/* Models */
+.model-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--color-bg);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.model-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--color-done);
+}
+
+/* Artistic treatments */
+.art-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+.art-item {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+.art-name {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.art-desc {
+  font-size: 11px;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+.art-tags {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+/* Anti-slop */
+.slop-section { margin-bottom: var(--space-4); }
+.slop-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+.slop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.slop-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  line-height: 1.45;
+}
+.slop-item.bad  .slop-icon { color: var(--color-fail); font-size: 11px; margin-top: 1px; }
+.slop-item.good .slop-icon { color: var(--color-done); font-size: 11px; margin-top: 1px; }
+
+/* Section label */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-faint);
+  margin-bottom: var(--space-3);
+  margin-top: var(--space-5);
+}
+.section-label:first-child { margin-top: 0; }
+
+
+.control-grid {
+  display:grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.action-card {
+  padding: var(--space-5);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-surface));
+  border: 1px solid var(--color-border);
+}
+.action-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-faint);
+  margin-bottom: 6px;
+}
+.action-title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+.action-copy {
+  font-size: 13px;
+  color: var(--color-muted);
+  line-height: 1.65;
+  margin-bottom: var(--space-4);
+}
+.action-row {
+  display:flex;
+  flex-wrap:wrap;
+  gap: var(--space-2);
+}
+.action-btn {
+  appearance:none;
+  border:none;
+  background: var(--color-text);
+  color: white;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor:pointer;
+}
+.action-btn.secondary {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+.action-meta {
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.meta-box {
+  padding: 12px var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+.meta-k {
+  font-size: 10px;
+  font-weight:700;
+  text-transform: uppercase;
+  letter-spacing:0.07em;
+  color: var(--color-faint);
+  margin-bottom:4px;
+}
+.meta-v {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+.control-grid.single {
+  grid-template-columns: 1fr;
+}
+.upload-hidden { display:none; }
+.empty-card {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, var(--color-surface-2), var(--color-surface));
+  border: 1px solid var(--color-border);
+}
+
+/* Compact audit tables */
+.mini-card-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--space-2);
+  margin-bottom:var(--space-3);
+}
+.mini-card-title {
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:-0.01em;
+}
+.mini-card-note {
+  font-size:11px;
+  color:var(--color-muted);
+}
+.mini-table {
+  border-top:1px solid var(--color-border);
+}
+.mini-tr {
+  display:grid;
+  grid-template-columns: 108px 1fr;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid var(--color-border);
+}
+.mini-th {
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--color-faint);
+}
+.mini-td {
+  font-size:12px;
+  color:var(--color-text);
+  line-height:1.45;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+.mini-inline-list {
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+}
+
+/* ═══════════════════════════════════════
+   LIVE MONITOR TAB
+   ═══════════════════════════════════════ */
+.spec-empty {
+  text-align: center;
+  padding: var(--space-7) var(--space-5);
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.spec-empty code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--color-bg);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.stage-tracker {
+  display: flex;
+  gap: 3px;
+  margin-bottom: var(--space-4);
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+/* reuse timeline styles */
+
+.spec-file-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 9px var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
+  font-size: 12px;
+}
+.file-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.file-dot.exists  { background: var(--color-done); }
+.file-dot.missing { background: var(--color-faint); }
+.file-time { font-size: 11px; color: var(--color-faint); margin-left: auto; }
+
+/* ═══════════════════════════════════════
+   SPEC VIEWER TAB
+   ═══════════════════════════════════════ */
+.color-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+.palette-item {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg);
+}
+.palette-swatch { height: 44px; }
+.palette-info { padding: var(--space-2); }
+.palette-name  { font-size: 10px; color: var(--color-muted); }
+.palette-value { font-size: 11px; font-family: var(--font-mono); }
+
+.spacing-bars { display: flex; flex-direction: column; gap: var(--space-1); }
+.spacing-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.spacing-bar-label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  width: 80px;
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+.spacing-bar {
+  height: 10px;
+  background: var(--color-active-bg);
+  border-radius: 2px;
+  border: 1px solid #bfdbfe;
+}
+.spacing-bar-value { font-size: 10px; color: var(--color-muted); }
+
+/* Compliance check */
+.compliance-list { display: flex; flex-direction: column; gap: var(--space-2); }
+.compliance-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 10px var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+.compliance-icon {
+  font-size: 13px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+.compliance-text { flex: 1; min-width: 0; }
+.compliance-rule { font-size: 13px; font-weight: 600; }
+.compliance-detail { font-size: 11px; color: var(--color-muted); margin-top: 2px; }
+
+/* ─── Footer ─── */
+.footer {
+  margin-top: var(--space-5);
+  padding: 10px var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  color: var(--color-faint);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  .app { padding: var(--space-4); }
+  .header-title { font-size: 24px; }
+  .type-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .law-grid { grid-template-columns: 1fr; }
+  .art-grid { grid-template-columns: 1fr; }
+  .overview-hero { padding: var(--space-6) var(--space-3) var(--space-5); }
+  .stats-bar { gap: var(--space-3); }
+  .stat-num { font-size: 22px; }
+}
+
+@media (max-width: 480px) {
+  .tabs .tab-btn { font-size: 11px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ─── Header ─── -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-eyebrow">HTMLCraft Dashboard</div>
+      <div class="header-title" id="project-name">HTML<em>Craft</em></div>
+    </div>
+    <div class="header-status">
+      <span id="ws-dot" class="status-dot disconnected"></span>
+      <span id="ws-label" class="status-label">CONNECTING</span>
+    </div>
+  </div>
+
+  <!-- ─── Tabs ─── -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="monitor">Live Monitor</button>
+    <button class="tab-btn" data-tab="spec">Spec Viewer</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       TAB 1: OVERVIEW
+       ═══════════════════════════════════════ -->
+  <div id="tab-overview" class="tab-content active">
+
+    <!-- Hero -->
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div class="overview-hero">
+        <div class="overview-hero-title">引导式 HTML<br><em>设计系统</em></div>
+        <p class="overview-hero-desc">
+          不是 AI 模板生成器。每个项目都经历完整的设计决策流程——从视觉论点到设计规格，到分段构建，确保结果是真实的设计系统支撑，而不是通用模板。
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-num"><span>50</span>+</div>
+        <div class="stat-label">设计律令</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><span>8</span></div>
+        <div class="stat-label">艺术处理</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><span>7</span></div>
+        <div class="stat-label">Hero 原型</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><span>22</span></div>
+        <div class="stat-label">参考文件</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><span>8</span></div>
+        <div class="stat-label">评估用例</div>
+      </div>
+    </div>
+
+    <!-- Output types -->
+    <div class="section-label">支持的输出类型</div>
+    <div class="type-grid">
+      <div class="type-card">
+        <span class="type-card-icon">⬜</span>
+        <div class="type-card-name">网页设计</div>
+        <div class="type-card-desc">Landing page、产品页、作品集、任何公开网页。完整视觉系统支撑。</div>
+        <div class="type-card-tags">
+          <span class="tag">Hero 冲击</span>
+          <span class="tag">CTA 转化</span>
+          <span class="tag">品牌感</span>
+        </div>
+      </div>
+      <div class="type-card">
+        <span class="type-card-icon">📄</span>
+        <div class="type-card-name">HTML 报告</div>
+        <div class="type-card-desc">调研报告、白皮书、分析文档。图文并茂，支持打印输出。</div>
+        <div class="type-card-tags">
+          <span class="tag">目录导航</span>
+          <span class="tag">可打印</span>
+          <span class="tag">信息层级</span>
+        </div>
+      </div>
+      <div class="type-card">
+        <span class="type-card-icon">▶</span>
+        <div class="type-card-name">HTML PPT</div>
+        <div class="type-card-desc">全屏幻灯片演示。键盘翻页、触摸滑动、全屏模式，三种方式同时支持。</div>
+        <div class="type-card-tags">
+          <span class="tag">键盘控制</span>
+          <span class="tag">触摸滑动</span>
+          <span class="tag">全屏模式</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workflow -->
+    <div class="section-label">设计流程 — 8 个阶段</div>
+    <div class="card">
+      <div class="card-subtitle" style="margin-bottom:var(--space-3);">逐步锁定每个决策，不跳过阶段。硬门（PRD / 视觉方向 / 规格审查）必须确认后才能继续。</div>
+      <div class="timeline" id="stage-timeline">
+        <div class="timeline-item" data-stage="0"><div class="timeline-num">0</div><div class="timeline-label">类型<br>选择</div></div>
+        <div class="timeline-item" data-stage="1"><div class="timeline-num">1</div><div class="timeline-label">需求<br>摄入</div></div>
+        <div class="timeline-item" data-stage="1.5"><div class="timeline-num">1.5</div><div class="timeline-label">PRD<br>确认</div></div>
+        <div class="timeline-item" data-stage="2"><div class="timeline-num">2</div><div class="timeline-label">参考图<br>分析</div></div>
+        <div class="timeline-item" data-stage="3"><div class="timeline-num">3</div><div class="timeline-label">视觉<br>方向</div></div>
+        <div class="timeline-item" data-stage="4"><div class="timeline-num">4</div><div class="timeline-label">设计<br>系统</div></div>
+        <div class="timeline-item" data-stage="5"><div class="timeline-num">5</div><div class="timeline-label">规格<br>生成</div></div>
+        <div class="timeline-item" data-stage="6"><div class="timeline-num">6</div><div class="timeline-label">分段<br>构建</div></div>
+        <div class="timeline-item" data-stage="7"><div class="timeline-num">7</div><div class="timeline-label">打磨<br>交付</div></div>
+      </div>
+    </div>
+
+    <!-- Design laws + Deliverables -->
+    <div class="two-col">
+      <div>
+        <div class="section-label">核心设计律令</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="law-grid">
+            <div class="law-item"><span class="law-char">T</span>字体最多 2 个家族</div>
+            <div class="law-item"><span class="law-char">C</span>颜色恰好 5 个槽位</div>
+            <div class="law-item"><span class="law-char">B</span>按钮高度统一 ≥44px</div>
+            <div class="law-item"><span class="law-char">K</span>卡片 shadow/border 二选一</div>
+            <div class="law-item"><span class="law-char">H</span>标题层级不跳级</div>
+            <div class="law-item"><span class="law-char">W</span>正文行长 ≤ 70ch</div>
+            <div class="law-item"><span class="law-char">S</span>正文最小 16px</div>
+            <div class="law-item"><span class="law-char">A</span>对比度 ≥ 4.5:1</div>
+            <div class="law-item"><span class="law-char">G</span>间距基数 4px</div>
+            <div class="law-item"><span class="law-char">R</span>375px + 1280px 必须适配</div>
+            <div class="law-item"><span class="law-char">I</span>SVG 图标，单一 family</div>
+            <div class="law-item"><span class="law-char">M</span>只 animate transform/opacity</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">5 个交付文件</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="file-list">
+            <div class="file-item">
+              <span class="file-name">.htmlcraft.md</span>
+              <span class="file-role" style="color:var(--color-accent);font-weight:700;font-size:10px;">最重要</span>
+            </div>
+            <div class="file-item">
+              <span class="file-name">design-tokens.css</span>
+              <span class="file-role">CSS 变量</span>
+            </div>
+            <div class="file-item">
+              <span class="file-name">design-tokens.json</span>
+              <span class="file-role">机器可读</span>
+            </div>
+            <div class="file-item">
+              <span class="file-name">design-spec.md</span>
+              <span class="file-role">决策记录</span>
+            </div>
+            <div class="file-item">
+              <span class="file-name">html-handoff.md</span>
+              <span class="file-role">实现交接</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Artistic Type System -->
+    <div class="section-label">艺术字系统 — 8 种处理手法</div>
+    <div class="card" style="padding:var(--space-4)">
+      <div class="card-subtitle" style="margin-bottom:var(--space-3);">每个项目只用一种，只作用于 Hero display font，正文保持中性。手法必须与视觉论点一致。</div>
+      <div class="art-grid">
+        <div class="art-item">
+          <div class="art-name">超大字裁切</div>
+          <div class="art-desc">字体比容器大，边缘被裁掉，形成张力</div>
+          <div class="art-tags"><span class="tag">暗黑</span><span class="tag">时尚</span><span class="tag">实验</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">透明镂空字</div>
+          <div class="art-desc">文字是「窗口」，背景透过文字可见</div>
+          <div class="art-tags"><span class="tag">创意</span><span class="tag">艺术</span><span class="tag">高奢</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">极端 Tracking</div>
+          <div class="art-desc">字间距推到 0.3em 或压到 -0.04em</div>
+          <div class="art-tags"><span class="tag">科技</span><span class="tag">极简</span><span class="tag">海报</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">超大 Italic 衬线</div>
+          <div class="art-desc">斜体衬线字超大，占满半屏</div>
+          <div class="art-tags"><span class="tag">编辑</span><span class="tag">杂志</span><span class="tag">高奢</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">中英混排不对称</div>
+          <div class="art-desc">中文超大，英文极小，视觉落差强烈</div>
+          <div class="art-tags"><span class="tag">国潮</span><span class="tag">文化</span><span class="tag">展览</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">Variable Weight 动画</div>
+          <div class="art-desc">字重随鼠标/滚动实时变化</div>
+          <div class="art-tags"><span class="tag">互动</span><span class="tag">科技</span><span class="tag">创意</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">文字作为纹理</div>
+          <div class="art-desc">重复文字密铺作为背景纹理层</div>
+          <div class="art-tags"><span class="tag">品牌</span><span class="tag">杂志</span><span class="tag">暗黑</span></div>
+        </div>
+        <div class="art-item">
+          <div class="art-name">渐变描边字</div>
+          <div class="art-desc">字体只有描边，填充是渐变或透明</div>
+          <div class="art-tags"><span class="tag">未来</span><span class="tag">科技</span><span class="tag">暗黑</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anti AI Slop -->
+    <div class="section-label">反 AI 通用化 — Slop 指纹检查</div>
+    <div class="two-col">
+      <div class="card" style="padding:var(--space-4)">
+        <div class="card-title" style="margin-bottom:var(--space-3);">绝对禁止 ✗</div>
+        <div class="slop-list">
+          <div class="slop-item bad"><span class="slop-icon">✗</span> 紫/青色渐变光斑背景</div>
+          <div class="slop-item bad"><span class="slop-icon">✗</span> Glassmorphism 毛玻璃卡片叠加</div>
+          <div class="slop-item bad"><span class="slop-icon">✗</span> Hero 区四格等宽「亮点」并排</div>
+          <div class="slop-item bad"><span class="slop-icon">✗</span> 过度使用渐变文字</div>
+          <div class="slop-item bad"><span class="slop-icon">✗</span> 漂浮的 3D 几何装饰元素</div>
+          <div class="slop-item bad"><span class="slop-icon">✗</span> 默认 Inter/Roboto，无字体个性</div>
+          <div class="slop-item bad"><span class="slop-icon">✗</span> 空泛文案「The future of X is here」</div>
+        </div>
+      </div>
+      <div class="card" style="padding:var(--space-4)">
+        <div class="card-title" style="margin-bottom:var(--space-3);">主动寻找 ✓</div>
+        <div class="slop-list">
+          <div class="slop-item good"><span class="slop-icon">✓</span> 一个主导视觉锚点</div>
+          <div class="slop-item good"><span class="slop-icon">✓</span> 字号对比 ≥ 3× (最大 vs 最小)</div>
+          <div class="slop-item good"><span class="slop-icon">✓</span> 真实的排版个性</div>
+          <div class="slop-item good"><span class="slop-icon">✓</span> 不对称或显式网格纪律</div>
+          <div class="slop-item good"><span class="slop-icon">✓</span> 区域密疏节奏变化</div>
+          <div class="slop-item good"><span class="slop-icon">✓</span> 参考图深度分析（2 轮）</div>
+          <div class="slop-item good"><span class="slop-icon">✓</span> 视觉论点驱动每个决策</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Archetypes -->
+    <div class="section-label">Hero 原型库 — 8 种布局</div>
+    <div class="card" style="padding:var(--space-4)">
+      <div class="card-subtitle" style="margin-bottom:var(--space-3);">每次设计必须显式选择一种原型，不能默认使用「左文右图」Split。</div>
+      <div class="law-grid">
+        <div class="law-item"><span class="law-char" style="font-size:9px;">S</span>Split Editorial Stage</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">F</span>Full-Bleed Poster</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">M</span>Manifesto Stack</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">P</span>Product Frame Hero</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">G</span>Gallery Mosaic</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">N</span>Narrative Scroll Teaser</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">X</span>Proof-First Command</div>
+        <div class="law-item"><span class="law-char" style="font-size:9px;">D</span>Docked Interface Hero</div>
+      </div>
+    </div>
+
+    <!-- Multi-model -->
+    <div class="section-label">多模型兼容</div>
+    <div class="card" style="padding:var(--space-4)">
+      <div class="card-subtitle" style="margin-bottom:var(--space-3);">设计系统通过 design-tokens.css 在不同模型和工具间保持一致。任何 AI 打开 .htmlcraft.md 即可恢复完整上下文。</div>
+      <div class="model-list">
+        <div class="model-chip"><span class="model-dot"></span>Claude Opus 4</div>
+        <div class="model-chip"><span class="model-dot"></span>Claude Sonnet 4.5</div>
+        <div class="model-chip"><span class="model-dot"></span>GPT-4o</div>
+        <div class="model-chip"><span class="model-dot"></span>Gemini 2.5 Pro</div>
+        <div class="model-chip"><span class="model-dot"></span>Llama 3.1 70B</div>
+        <div class="model-chip"><span class="model-dot"></span>Mistral Large</div>
+      </div>
+      <div style="margin-top:var(--space-3); display:flex; flex-wrap:wrap; gap:var(--space-2);">
+        <span class="pill pill-locked">Claude Code</span>
+        <span class="pill pill-locked">Cursor</span>
+        <span class="pill pill-locked">Copilot</span>
+        <span class="pill pill-locked">Windsurf</span>
+        <span class="pill pill-locked">OpenAI Codex</span>
+        <span class="pill pill-locked">Gemini CLI</span>
+      </div>
+    </div>
+
+  </div><!-- /tab-overview -->
+
+  <!-- ═══════════════════════════════════════
+       TAB 2: LIVE MONITOR
+       ═══════════════════════════════════════ -->
+  <div id="tab-monitor" class="tab-content">
+
+    <div id="monitor-empty" class="card">
+      <div class="spec-empty">
+        还没有加载项目。<br>
+        你可以直接在上方选择本地项目文件夹 / 多选关键文件，或者恢复上次快照。终端连接成功不代表已经有可监控的项目数据。
+      </div>
+    </div>
+
+    <div id="monitor-content">
+
+      <div class="control-grid">
+        <div class="action-card">
+          <div class="action-eyebrow">Live Monitor</div>
+          <div class="action-title">连接本地项目文件</div>
+          <div class="action-copy">除了终端实时监听，你也可以直接把本地项目文件夹或文件丢进来。仪表盘会识别交付物、场景与当前审计模式。</div>
+          <div class="action-row">
+            <button class="action-btn" id="pick-folder-btn">选择项目文件夹</button>
+            <button class="action-btn secondary" id="pick-files-btn">多选关键文件</button>
+            <button class="action-btn secondary" id="clear-local-btn">清空本地包</button>
+          </div>
+          <div class="action-meta">
+            <div class="meta-box">
+              <div class="meta-k">识别来源</div>
+              <div class="meta-v" id="local-source-label">Terminal WebSocket</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-k">本地文件数</div>
+              <div class="meta-v" id="local-file-count">0</div>
+            </div>
+          </div>
+          <input id="folder-input" class="upload-hidden" type="file" webkitdirectory directory multiple>
+          <input id="files-input" class="upload-hidden" type="file" multiple accept=".md,.json,.css,.html,.txt">
+        </div>
+        <div class="action-card">
+          <div class="action-eyebrow">Session Memory</div>
+          <div class="action-title">退出后也能恢复</div>
+          <div class="action-copy">Live Monitor 的本地上传内容、审计状态和最近一轮改动会自动保存。下次打开时，仪表盘可以直接恢复上一次上下文。</div>
+          <div class="action-row">
+            <button class="action-btn" id="save-session-btn">立即保存快照</button>
+            <button class="action-btn secondary" id="restore-session-btn">恢复上次快照</button>
+            <button class="action-btn secondary" id="clear-session-btn">清除快照</button>
+          </div>
+          <div class="action-meta">
+            <div class="meta-box">
+              <div class="meta-k">保存状态</div>
+              <div class="meta-v" id="session-status">尚未保存</div>
+            </div>
+            <div class="meta-box">
+              <div class="meta-k">最近保存</div>
+              <div class="meta-v" id="session-saved-at">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div id="monitor-data-wrap" style="display:none">
+
+      <!-- Stage tracker -->
+      <div class="section-label">当前阶段</div>
+      <div class="card" style="padding:var(--space-4)">
+        <div class="timeline" id="monitor-stage-timeline">
+          <div class="timeline-item" data-stage="1"><div class="timeline-num">1</div><div class="timeline-label">PRD</div></div>
+          <div class="timeline-item" data-stage="2"><div class="timeline-num">2</div><div class="timeline-label">参考</div></div>
+          <div class="timeline-item" data-stage="3"><div class="timeline-num">3</div><div class="timeline-label">论点</div></div>
+          <div class="timeline-item" data-stage="4"><div class="timeline-num">4</div><div class="timeline-label">TOKENS</div></div>
+          <div class="timeline-item" data-stage="5"><div class="timeline-num">5</div><div class="timeline-label">规范</div></div>
+          <div class="timeline-item" data-stage="6"><div class="timeline-num">6</div><div class="timeline-label">映射</div></div>
+          <div class="timeline-item" data-stage="7"><div class="timeline-num">7</div><div class="timeline-label">审计</div></div>
+        </div>
+      </div>
+
+      <!-- Mode -->
+      <div id="m-mode-card" style="display:none">
+        <div class="section-label">当前模式</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-3);margin-bottom:var(--space-3)">
+            <div>
+              <div id="m-mode-title" style="font-size:18px;font-weight:800;letter-spacing:-0.02em"></div>
+              <div id="m-mode-subtitle" class="card-subtitle" style="margin-top:4px"></div>
+            </div>
+            <span id="m-mode-pill" class="pill pill-locked">MODE</span>
+          </div>
+          <div class="two-col" style="margin-bottom:0">
+            <div class="file-item" style="padding:12px var(--space-3)">
+              <div>
+                <div class="card-subtitle" style="margin-bottom:2px">Primary Artifact</div>
+                <div id="m-primary-artifact" style="font-family:var(--font-mono);font-size:12px;font-weight:700">design-tokens.css</div>
+              </div>
+            </div>
+            <div class="file-item" style="padding:12px var(--space-3)">
+              <div>
+                <div class="card-subtitle" style="margin-bottom:2px">Flow Model</div>
+                <div style="font-size:12px;line-height:1.5;color:var(--color-text)">PRD → 参考 → 视觉论点 → Tokens → 规范 → HTML 映射 → 审计</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col" id="m-audit-grid-1">
+        <div id="m-project-card" style="display:none">
+          <div class="card" style="padding:var(--space-4)">
+            <div class="mini-card-head">
+              <div>
+                <div class="mini-card-title">项目身份</div>
+                <div class="mini-card-note">判断这是不是同一个项目、同一套系统</div>
+              </div>
+            </div>
+            <div id="m-project-table" class="mini-table"></div>
+          </div>
+        </div>
+        <div id="m-scenario-card" style="display:none">
+          <div class="card" style="padding:var(--space-4)">
+            <div class="mini-card-head">
+              <div>
+                <div class="mini-card-title">审计场景</div>
+                <div class="mini-card-note">先识别场景，再决定怎么审</div>
+              </div>
+            </div>
+            <div id="m-scenario-table" class="mini-table"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col" id="m-audit-grid-2">
+        <div id="m-change-card" style="display:none">
+          <div class="card" style="padding:var(--space-4)">
+            <div class="mini-card-head">
+              <div>
+                <div class="mini-card-title">本轮改动摘要</div>
+                <div class="mini-card-note">看清这轮到底改了什么、波及到哪</div>
+              </div>
+            </div>
+            <div id="m-change-table" class="mini-table"></div>
+          </div>
+        </div>
+        <div id="m-drift-card" style="display:none">
+          <div class="card" style="padding:var(--space-4)">
+            <div class="mini-card-head">
+              <div>
+                <div class="mini-card-title">漂移地图</div>
+                <div class="mini-card-note">不是只看 pass / fail，而是看哪一层正在偏</div>
+              </div>
+            </div>
+            <div id="m-drift-table" class="mini-table"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="m-context-card" style="display:none">
+        <div class="card" style="padding:var(--space-4)">
+          <div class="mini-card-head">
+            <div>
+              <div class="mini-card-title">LLM Context Pack</div>
+              <div class="mini-card-note">下一轮模型必须先读什么、允许改什么、不能碰什么</div>
+            </div>
+          </div>
+          <div id="m-context-table" class="mini-table"></div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="section-label">文件进度</div>
+      <div class="card" style="padding:var(--space-4)">
+        <div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-3)">
+          <div class="progress-bar" style="flex:1"><div id="m-progress" class="progress-fill" style="width:0%"></div></div>
+          <span id="m-progress-label" style="font-size:12px;font-weight:700;color:var(--color-muted);flex-shrink:0;font-variant-numeric:tabular-nums">0/6</span>
+        </div>
+        <div id="m-artifacts"></div>
+      </div>
+
+      <!-- Decisions -->
+      <div id="m-decisions-card" style="display:none">
+        <div class="section-label">设计决策</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="card-subtitle" style="margin-bottom:var(--space-3)">来自 .htmlcraft.md</div>
+          <div id="m-decisions"></div>
+        </div>
+      </div>
+
+      <!-- Tokens -->
+      <div id="m-tokens-card" style="display:none">
+        <div class="section-label">Primary Artifact · Design Tokens</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="card-subtitle" style="margin-bottom:var(--space-3)">第一真值 · 所有规范文件与 HTML 都应服从它</div>
+          <div id="m-tokens"></div>
+        </div>
+      </div>
+
+      <!-- Audit -->
+      <div id="m-audit-card" style="display:none">
+        <div class="section-label">交付物审计</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="card-subtitle" id="m-audit-subtitle" style="margin-bottom:var(--space-3)"></div>
+
+          <!-- Section map -->
+          <div id="m-audit-sections" style="display:none;margin-bottom:var(--space-4)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-muted);margin-bottom:var(--space-2)">Section 结构</div>
+            <div id="m-sections-list" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+          </div>
+
+          <!-- Headings -->
+          <div id="m-audit-headings" style="display:none;margin-bottom:var(--space-4)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-muted);margin-bottom:var(--space-2)">标题层级</div>
+            <div id="m-headings-list"></div>
+          </div>
+
+          <!-- CTA -->
+          <div id="m-audit-cta" style="display:none;margin-bottom:var(--space-4)">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-muted);margin-bottom:var(--space-2)">CTA 检测</div>
+            <div id="m-cta-list" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+          </div>
+
+          <!-- Strengths / Issues -->
+          <div id="m-audit"></div>
+        </div>
+      </div>
+
+
+      </div>
+    </div>
+  </div><!-- /tab-monitor -->
+
+  <!-- ═══════════════════════════════════════
+       TAB 3: SPEC VIEWER
+       ═══════════════════════════════════════ -->
+  <div id="tab-spec" class="tab-content">
+
+    <div class="control-grid single" style="margin-bottom:var(--space-4)">
+      <div class="action-card">
+        <div class="action-eyebrow">Spec Viewer</div>
+        <div class="action-title">上传 CSS 做单文件可视化检查</div>
+        <div class="action-copy">Spec Viewer 现在不只吃终端里的 <code>design-tokens.css</code>，也可以直接上传一个本地 CSS 文件做 tokens 解析、色彩检查和规则可视化。</div>
+        <div class="action-row">
+          <button class="action-btn" id="pick-css-btn">上传 CSS 文件</button>
+          <button class="action-btn secondary" id="clear-css-btn">清空 CSS 预览</button>
+        </div>
+        <div class="action-meta">
+          <div class="meta-box">
+            <div class="meta-k">当前来源</div>
+            <div class="meta-v" id="css-source-label">design-tokens.css / Live Monitor</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-k">当前文件</div>
+            <div class="meta-v" id="css-file-label">未上传单独 CSS</div>
+          </div>
+        </div>
+        <input id="css-input" class="upload-hidden" type="file" accept=".css,.txt">
+      </div>
+    </div>
+
+    <div id="spec-empty" class="empty-card">
+      <div class="spec-empty">
+        暂无规格文件。<br>
+        当 HTMLCraft 生成 <code>design-tokens.css</code> 时，这里会展示完整的设计系统可视化。
+      </div>
+    </div>
+
+    <div id="spec-content" style="display:none">
+
+      <!-- File Status -->
+      <div class="section-label">文件清单</div>
+      <div class="card" style="padding:var(--space-4)">
+        <div id="s-files"></div>
+      </div>
+
+      <!-- Colors -->
+      <div id="s-colors-card" style="display:none">
+        <div class="section-label">调色板</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div id="s-colors" class="color-palette"></div>
+          <!-- Contrast check -->
+          <div id="s-contrast" style="margin-top:var(--space-4);display:none">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--color-muted);margin-bottom:var(--space-2)">对比度检查 (WCAG AA)</div>
+            <div id="s-contrast-list" class="compliance-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div id="s-type-card" style="display:none">
+        <div class="section-label">排版系统</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div id="s-type"></div>
+        </div>
+      </div>
+
+      <!-- Spacing -->
+      <div id="s-spacing-card" style="display:none">
+        <div class="section-label">间距系统</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div id="s-spacing" class="spacing-bars"></div>
+        </div>
+      </div>
+
+      <!-- Components -->
+      <div id="s-components-card" style="display:none">
+        <div class="section-label">组件 Tokens</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div id="s-components"></div>
+        </div>
+      </div>
+
+      <!-- Compliance -->
+      <div id="s-compliance-card" style="display:none">
+        <div class="section-label">律令合规检查</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="card-subtitle" style="margin-bottom:var(--space-3)">自动检查第一真值 design-tokens.css 是否符合设计律令</div>
+          <div id="s-compliance" class="compliance-list"></div>
+        </div>
+      </div>
+
+      <!-- Raw Constraints -->
+      <div id="s-constraints-card" style="display:none">
+        <div class="section-label">约束规则原文</div>
+        <div class="card" style="padding:var(--space-4)">
+          <div class="card-subtitle" style="margin-bottom:var(--space-3)">来自 .htmlcraft.md</div>
+          <div id="s-constraints" style="font-size:12px;line-height:1.8;white-space:pre-wrap;font-family:var(--font-mono);color:var(--color-muted);overflow-x:auto;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /tab-spec -->
+
+  <!-- Footer -->
+  <div class="footer">
+    HTMLCraft Dashboard &nbsp;·&nbsp; Token-first 仪表盘 &nbsp;·&nbsp; 文件变更时自动更新
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ════════════════════════════════════════
+//  State
+// ════════════════════════════════════════
+const state = {
+  files: {},
+  localFiles: {},
+  audit: null,
+  artifacts: null,
+  cssPreview: '',
+  cssPreviewName: '',
+  lastChange: null,
+  history: [],
+  sessionMeta: { savedAt: '', source: 'terminal' },
+};
+
+const WATCHED = ['.htmlcraft.md', 'design-tokens.css', 'design-tokens.json', 'design-spec.md', 'html-handoff.md', 'index.html', 'audit-log.json'];
+
+// ════════════════════════════════════════
+//  Tabs
+// ════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ════════════════════════════════════════
+//  Persistence + Local Package Upload
+// ════════════════════════════════════════
+const SNAPSHOT_KEY = 'htmlcraft_dashboard_snapshot_v1';
+
+function getActiveFiles() {
+  return { ...state.files, ...state.localFiles };
+}
+
+function scanClientArtifacts(files) {
+  const keys = Object.keys(files || {});
+  const core = ['.htmlcraft.md', 'design-spec.md', 'design-tokens.css', 'html-handoff.md', 'index.html'];
+  const coreComplete = core.every(f => keys.includes(f));
+  return {
+    present: keys,
+    missing: WATCHED.filter(f => !keys.includes(f)),
+    coreComplete,
+    mode: coreComplete ? 'audit-revision' : (keys.length ? 'partial-audit' : 'system-build'),
+    primaryArtifact: 'design-tokens.css',
+    auditLogPresent: keys.includes('audit-log.json'),
+  };
+}
+
+function getActiveArtifacts() {
+  return Object.keys(state.localFiles).length > 0 ? scanClientArtifacts(getActiveFiles()) : state.artifacts;
+}
+
+function persistSnapshot() {
+  const payload = {
+    localFiles: state.localFiles,
+    cssPreview: state.cssPreview,
+    cssPreviewName: state.cssPreviewName,
+    lastChange: state.lastChange,
+    history: state.history,
+    audit: state.audit,
+    artifacts: state.artifacts,
+    sessionMeta: { ...state.sessionMeta, savedAt: new Date().toISOString() },
+  };
+  localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(payload));
+  state.sessionMeta.savedAt = payload.sessionMeta.savedAt;
+  updateSessionMeta();
+}
+
+function restoreSnapshot() {
+  const raw = localStorage.getItem(SNAPSHOT_KEY);
+  if (!raw) return false;
+  try {
+    const snap = JSON.parse(raw);
+    state.localFiles = snap.localFiles || {};
+    state.cssPreview = snap.cssPreview || '';
+    state.cssPreviewName = snap.cssPreviewName || '';
+    state.lastChange = snap.lastChange || null;
+    state.history = snap.history || [];
+    if (!state.audit && snap.audit) state.audit = snap.audit;
+    if (!state.artifacts && snap.artifacts) state.artifacts = snap.artifacts;
+    state.sessionMeta = snap.sessionMeta || state.sessionMeta;
+    updateSessionMeta();
+    renderAll();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearSnapshot() {
+  localStorage.removeItem(SNAPSHOT_KEY);
+  state.sessionMeta.savedAt = '';
+  updateSessionMeta();
+}
+
+async function readSelectedFiles(fileList, mode='local-package') {
+  const files = Array.from(fileList || []);
+  const next = { ...state.localFiles };
+  for (const file of files) {
+    const name = file.name;
+    const lower = name.toLowerCase();
+    const shouldRead = WATCHED.includes(name) || name === 'audit-log.json' || lower.endsWith('.css') || lower.endsWith('.md') || lower.endsWith('.json') || lower.endsWith('.html');
+    if (!shouldRead) continue;
+    const text = await file.text();
+    next[name] = text;
+  }
+  state.localFiles = next;
+  state.sessionMeta.source = mode === 'css' ? 'css-preview' : 'local-package';
+  state.lastChange = { file: mode === 'css' ? 'css-preview' : 'local-package', at: new Date().toISOString() };
+  state.history.push(state.lastChange);
+  if (state.history.length > 20) state.history = state.history.slice(-20);
+  persistSnapshot();
+  renderAll();
+}
+
+function updateSessionMeta() {
+  const sourceMap = {
+    terminal: 'Terminal WebSocket',
+    'local-package': '本地文件夹 / 文件上传',
+    'css-preview': '单独 CSS 预览',
+  };
+  const sourceEl = document.getElementById('local-source-label');
+  if (sourceEl) {
+    const fallback = state.artifacts ? 'Terminal WebSocket（已连接，等待项目）' : 'Terminal WebSocket';
+    sourceEl.textContent = sourceMap[state.sessionMeta.source] || fallback;
+  }
+  const countEl = document.getElementById('local-file-count');
+  if (countEl) countEl.textContent = String(Object.keys(state.localFiles).length);
+  const statusEl = document.getElementById('session-status');
+  if (statusEl) statusEl.textContent = state.sessionMeta.savedAt ? '已保存到浏览器本地' : '尚未保存';
+  const savedAtEl = document.getElementById('session-saved-at');
+  if (savedAtEl) savedAtEl.textContent = state.sessionMeta.savedAt ? formatTs(state.sessionMeta.savedAt) : '—';
+  const cssSourceEl = document.getElementById('css-source-label');
+  if (cssSourceEl) cssSourceEl.textContent = state.cssPreview ? '上传 CSS 预览' : 'design-tokens.css / Live Monitor';
+  const cssFileEl = document.getElementById('css-file-label');
+  if (cssFileEl) cssFileEl.textContent = state.cssPreviewName || '未上传单独 CSS';
+}
+
+function setupLocalControls() {
+  const byId = id => document.getElementById(id);
+  byId('pick-folder-btn')?.addEventListener('click', () => byId('folder-input').click());
+  byId('pick-files-btn')?.addEventListener('click', () => byId('files-input').click());
+  byId('pick-css-btn')?.addEventListener('click', () => byId('css-input').click());
+  byId('folder-input')?.addEventListener('change', e => readSelectedFiles(e.target.files, 'local-package'));
+  byId('files-input')?.addEventListener('change', e => readSelectedFiles(e.target.files, 'local-package'));
+  byId('css-input')?.addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    state.cssPreview = await file.text();
+    state.cssPreviewName = file.name;
+    state.sessionMeta.source = 'css-preview';
+    persistSnapshot();
+    renderAll();
+  });
+  byId('clear-local-btn')?.addEventListener('click', () => { state.localFiles = {}; renderAll(); persistSnapshot(); });
+  byId('save-session-btn')?.addEventListener('click', () => persistSnapshot());
+  byId('restore-session-btn')?.addEventListener('click', () => restoreSnapshot());
+  byId('clear-session-btn')?.addEventListener('click', () => { clearSnapshot(); state.localFiles = {}; state.cssPreview = ''; state.cssPreviewName = ''; renderAll(); });
+  byId('clear-css-btn')?.addEventListener('click', () => { state.cssPreview = ''; state.cssPreviewName = ''; renderAll(); persistSnapshot(); });
+  updateSessionMeta();
+}
+
+// ════════════════════════════════════════
+//  Parsers
+// ════════════════════════════════════════
+function parseTokensCSS(css) {
+  if (!css) return {};
+  const tokens = {};
+  const re = /--([\w-]+)\s*:\s*([^;/\n]+)/g;
+  let m;
+  while ((m = re.exec(css)) !== null) {
+    const val = m[2].trim().replace(/\/\*.*\*\//, '').trim();
+    if (val) tokens[m[1]] = val;
+  }
+  return tokens;
+}
+
+function parseHtmlcraftMD(md) {
+  if (!md) return null;
+  const info = {};
+  const tableRe = /\|\s*(.+?)\s*\|\s*(.+?)\s*\|/g;
+  let m;
+  while ((m = tableRe.exec(md)) !== null) {
+    const key = m[1].trim().replace(/^`|`$/g, '');
+    const val = m[2].trim();
+    if (key && val && key !== '---' && key !== '项目' && key !== '决策项' && key !== '角色' && key !== '文件') {
+      info[key] = val;
+    }
+  }
+  return info;
+}
+
+function safeJsonParse(raw) {
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+function parseAuditLog(raw) {
+  const obj = safeJsonParse(raw);
+  return obj && typeof obj === 'object' ? obj : null;
+}
+
+function formatTs(ts) {
+  if (!ts) return '—';
+  try { return new Date(ts).toLocaleString(); } catch { return String(ts); }
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+}
+
+function badge(label, tone='pending') {
+  const cls = tone === 'done' ? 'pill-done' : tone === 'fail' ? 'pill-fail' : tone === 'accent' ? 'pill-accent' : tone === 'locked' ? 'pill-locked' : 'pill-pending';
+  return `<span class="pill ${cls}">${escapeHtml(label)}</span>`;
+}
+
+function renderMiniTable(rows) {
+  return rows.map(r => `
+    <div class="mini-tr">
+      <div class="mini-th">${escapeHtml(r.label)}</div>
+      <div class="mini-td">${r.html ?? escapeHtml(r.value ?? '—')}</div>
+    </div>
+  `).join('');
+}
+
+function isColor(val) {
+  return /^#[0-9a-fA-F]{3,8}$/.test(val) ||
+         /^(rgb|hsl|oklch|hwb)\s*\(/.test(val);
+}
+
+function categorizeTokens(tokens) {
+  const colors = {}, type = {}, spacing = {}, components = {}, other = {};
+  for (const [k, v] of Object.entries(tokens)) {
+    if (k.startsWith('color-')) colors[k] = v;
+    else if (k.startsWith('font-') || k.startsWith('text-') || k.startsWith('leading-') || k.startsWith('weight-') || k.startsWith('tracking-')) type[k] = v;
+    else if (k.startsWith('space-') || k.startsWith('gutter-') || k.startsWith('container-')) spacing[k] = v;
+    else if (k.startsWith('btn-') || k.startsWith('card-') || k.startsWith('nav-') || k.startsWith('input-') || k.startsWith('radius-')) components[k] = v;
+    else other[k] = v;
+  }
+  return { colors, type, spacing, components, other };
+}
+
+// ════════════════════════════════════════
+//  Stage Inference
+// ════════════════════════════════════════
+function inferStage(files, artifacts, audit) {
+  const has = f => !!files[f];
+  if (audit || (artifacts && artifacts.coreComplete)) return 7;
+  if (has('index.html')) return 6;
+  if (has('design-spec.md') || has('html-handoff.md')) return 5;
+  if (has('design-tokens.css') || has('design-tokens.json')) return 4;
+  if (has('.htmlcraft.md')) return 3;
+  return 1;
+}
+
+function updateStageTimeline(stageEl, currentStage) {
+  stageEl.querySelectorAll('.timeline-item').forEach(item => {
+    const s = parseFloat(item.dataset.stage);
+    item.classList.remove('stage-done', 'stage-active');
+    if (s < currentStage) item.classList.add('stage-done');
+    else if (s === currentStage) item.classList.add('stage-active');
+  });
+}
+
+// ════════════════════════════════════════
+//  Contrast Ratio Calculation
+// ════════════════════════════════════════
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const n = h.length === 3
+    ? [parseInt(h[0]+h[0],16), parseInt(h[1]+h[1],16), parseInt(h[2]+h[2],16)]
+    : [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  return n;
+}
+
+function relativeLuminance([r, g, b]) {
+  const lin = v => {
+    const s = v / 255;
+    return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+function contrastRatio(hex1, hex2) {
+  try {
+    const l1 = relativeLuminance(hexToRgb(hex1));
+    const l2 = relativeLuminance(hexToRgb(hex2));
+    const [hi, lo] = l1 > l2 ? [l1, l2] : [l2, l1];
+    return ((hi + 0.05) / (lo + 0.05)).toFixed(2);
+  } catch { return null; }
+}
+
+// ════════════════════════════════════════
+//  Compliance Check
+// ════════════════════════════════════════
+function runComplianceCheck(tokens) {
+  const results = [];
+
+  // Font families ≤ 2
+  const fontFamilies = Object.entries(tokens)
+    .filter(([k]) => k.startsWith('font-') && !k.includes('size') && !k.includes('weight') && !k.includes('style'))
+    .map(([,v]) => v);
+  const uniqueFonts = [...new Set(fontFamilies.map(f => f.split(',')[0].trim()))];
+  results.push({
+    pass: uniqueFonts.length <= 2,
+    rule: '字体家族 ≤ 2 个',
+    detail: uniqueFonts.length > 0 ? `检测到 ${uniqueFonts.length} 个：${uniqueFonts.join('、')}` : '未检测到字体 token',
+  });
+
+  // Button height ≥ 44px
+  const btnH = tokens['btn-height'];
+  if (btnH) {
+    const px = parseInt(btnH);
+    results.push({
+      pass: px >= 44,
+      rule: '按钮高度 ≥ 44px',
+      detail: `当前值：${btnH}`,
+    });
+  }
+
+  // Body font size ≥ 16px
+  const baseSize = tokens['text-base'];
+  if (baseSize) {
+    const px = parseInt(baseSize);
+    results.push({
+      pass: px >= 16,
+      rule: '正文最小 16px',
+      detail: `--text-base: ${baseSize}`,
+    });
+  }
+
+  // Card style: shadow or border, not both
+  const cardShadow = tokens['card-shadow'];
+  const cardBorder = tokens['card-border'];
+  if (cardShadow !== undefined || cardBorder !== undefined) {
+    const hasShadow = cardShadow && cardShadow !== 'none';
+    const hasBorder = cardBorder && cardBorder !== 'none';
+    results.push({
+      pass: !(hasShadow && hasBorder),
+      rule: '卡片 shadow / border 二选一',
+      detail: hasShadow && hasBorder ? '同时存在 shadow 和 border——违规' : hasShadow ? '使用 shadow' : hasBorder ? '使用 border' : '未检测到卡片样式',
+    });
+  }
+
+  // Spacing base = 4px multiples
+  const spaceTokens = Object.entries(tokens).filter(([k]) => k.startsWith('space-'));
+  if (spaceTokens.length > 0) {
+    const allMultiples = spaceTokens.every(([,v]) => parseInt(v) % 4 === 0);
+    results.push({
+      pass: allMultiples,
+      rule: '间距基数为 4px 倍数',
+      detail: `检测了 ${spaceTokens.length} 个间距 token`,
+    });
+  }
+
+  return results;
+}
+
+// ════════════════════════════════════════
+//  Renderers
+// ════════════════════════════════════════
+function resolveTokenDisplay(val) {
+  if (isColor(val)) {
+    return `<span class="color-swatch" style="background:${val}"></span>`;
+  }
+  return '';
+}
+
+function inferScenario(auditLog) {
+  const hint = [auditLog?.scenario_hint, auditLog?.current_scope, auditLog?.last_changed_scope].filter(Boolean).join(' ').toLowerCase();
+  const file = state.lastChange?.file || (state.audit?.trigger && state.audit.trigger !== 'initial-load' ? state.audit.trigger : '');
+
+  if (state.artifacts?.mode === 'audit-revision' && (!state.lastChange || state.audit?.trigger === 'initial-load')) {
+    return { key:'resume-window', label:'新会话恢复', risk:'高', full:true, why:'检测到完整交付物，本次更像恢复项目而不是重新设计。' };
+  }
+  if (file === 'design-tokens.css' || /token|system|spacing|radius|font|color|系统/.test(hint)) {
+    return { key:'system-change', label:'系统级修改', risk:'高', full:true, why:'你动到的是设计宪法，会向下波及多个页面与组件。' };
+  }
+  if (/hero|cover|banner|首屏|封面|landing|homepage/.test(hint)) {
+    return { key:'hero-change', label:'封面 / Hero 修改', risk:'高', full:true, why:'Hero 承载视觉论点与 CTA，不能只做局部检查。' };
+  }
+  if (/subpage|pricing|about|case|detail|dashboard|子页面|page/.test(hint)) {
+    return { key:'subpage-change', label:'子页面修改', risk:'中高', full:true, why:'重点不是本页好不好，而是是否仍属于同一系统。' };
+  }
+  if (/component|button|card|input|nav|tag|modal|table|组件/.test(hint)) {
+    return { key:'component-change', label:'组件修改', risk:'中', full:false, why:'重点检查组件家族一致性和 token 服从关系。' };
+  }
+  if (file === 'index.html') {
+    return { key:'page-revision', label:'页面实现修改', risk:'中', full:false, why:'优先做局部轻审计，再决定要不要升级为全审计。' };
+  }
+  return { key:'steady-state', label:'常规监控', risk:'低', full:false, why:'暂无明显高风险修改，保持持续监控。' };
+}
+
+function buildDriftRows(scenario, auditLog) {
+  const issues = ((state.audit?.heuristics?.issues || []).join(' ') + ' ' + (auditLog?.open_issues || []).join(' ')).toLowerCase();
+  const base = [
+    { label:'Visual Thesis', status:'稳定', tone:'done', detail:'视觉论点未见明显偏移' },
+    { label:'Tokens', status:'稳定', tone:'done', detail:'仍以 design-tokens.css 为第一真值' },
+    { label:'Structure', status:'稳定', tone:'done', detail:'section 结构未见高风险漂移' },
+    { label:'Components', status:'稳定', tone:'done', detail:'组件家族暂未发现分裂' },
+    { label:'Cross-page', status:'稳定', tone:'done', detail:'跨页面一致性暂无明显风险' },
+    { label:'Context', status:'稳定', tone:'done', detail:'审计上下文连续' },
+  ];
+  const setWarn = (name, status, detail, tone='pending') => {
+    const row = base.find(r => r.label === name);
+    if (row) { row.status = status; row.detail = detail; row.tone = tone; }
+  };
+  if (scenario.key === 'component-change') setWarn('Components', '关注', '本轮聚焦组件家族；重点看同族一致性与 token 服从。');
+  if (scenario.key === 'hero-change') { setWarn('Visual Thesis', '关注', '封面 / Hero 变更最容易破坏视觉论点。'); setWarn('Structure', '关注', '首屏与第二屏过渡需要重点复查。'); }
+  if (scenario.key === 'subpage-change') { setWarn('Cross-page', '关注', '要看子页面是否仍属于同一系统。'); setWarn('Structure', '关注', '局部页面结构变化可能影响导航与共享模块。'); }
+  if (scenario.key === 'system-change') { setWarn('Tokens', '高风险', '本轮改动触及系统层，必须全审计。', 'fail'); setWarn('Components', '关注', '下游组件可能需要整体重映射。'); setWarn('Cross-page', '关注', '所有页面都可能受影响。'); }
+  if (scenario.key === 'resume-window') setWarn('Context', '复核', '新会话恢复时，必须先确认项目身份与未解决问题。');
+  if (/token|hardcod|hex|spacing|radius/.test(issues)) setWarn('Tokens', '漂移', '审计结果提示 token 或硬编码问题。', 'fail');
+  if (/hero|cta|heading|section/.test(issues)) setWarn('Structure', '漂移', '审计结果提示结构 / Hero / CTA 相关问题。', 'pending');
+  return base.map(r => ({ label:r.label, html:`${badge(r.status, r.tone)} <span style="margin-left:8px">${escapeHtml(r.detail)}</span>` }));
+}
+
+function buildContextRows(scenario, auditLog) {
+  const pack = auditLog?.next_llm_scope || {};
+  const mustRead = pack.must_read || (() => {
+    if (scenario.key === 'component-change') return ['design-tokens.css','index.html','audit-log.json'];
+    if (scenario.key === 'hero-change') return ['design-tokens.css','.htmlcraft.md','design-spec.md','html-handoff.md','index.html'];
+    if (scenario.key === 'subpage-change') return ['design-tokens.css','design-spec.md','html-handoff.md','index.html','audit-log.json'];
+    if (scenario.key === 'system-change') return ['design-tokens.css','design-spec.md','.htmlcraft.md','html-handoff.md','index.html','audit-log.json'];
+    if (scenario.key === 'resume-window') return ['design-tokens.css','audit-log.json','.htmlcraft.md','design-spec.md','html-handoff.md','index.html'];
+    return ['design-tokens.css','.htmlcraft.md','index.html'];
+  })();
+  const allowed = pack.allowed || (() => {
+    if (scenario.key === 'component-change') return ['组件族内部样式','相关 token','局部 HTML'];
+    if (scenario.key === 'hero-change') return ['Hero 结构','首屏排版','CTA 层级'];
+    if (scenario.key === 'subpage-change') return ['目标子页面','共享模块映射','局部布局'];
+    if (scenario.key === 'system-change') return ['tokens','相关 spec','下游映射修复'];
+    return ['当前场景相关层'];
+  })();
+  const forbidden = pack.forbidden || (() => {
+    if (scenario.key === 'component-change') return ['顺手改 Hero','发明新色','新增未定义组件规则'];
+    if (scenario.key === 'hero-change') return ['绕开 tokens','顺手改子页面系统'];
+    if (scenario.key === 'subpage-change') return ['重写主系统','新增孤立视觉语言'];
+    if (scenario.key === 'system-change') return ['只改 HTML 不改 tokens','无说明地局部特判'];
+    return ['脱离 design-tokens.css'];
+  })();
+  return [
+    { label:'Must Read', html:`<div class="mini-inline-list">${mustRead.map(f => badge(f, 'locked')).join('')}</div>` },
+    { label:'Allowed', html:`<div class="mini-inline-list">${allowed.map(f => badge(f, 'accent')).join('')}</div>` },
+    { label:'Forbidden', html:`<div class="mini-inline-list">${forbidden.map(f => badge(f, 'fail')).join('')}</div>` },
+  ];
+}
+
+function renderScenarioPanels() {
+  const auditLog = parseAuditLog(getActiveFiles()['audit-log.json']);
+  const info = parseHtmlcraftMD(state.files['.htmlcraft.md']) || {};
+  const scenario = inferScenario(auditLog);
+  const revCount = auditLog?.revision_count_since_full_audit ?? state.history.filter(h => h.file !== 'audit-log.json').length;
+  const requireFull = scenario.full || revCount >= 3;
+  const fullReason = scenario.full ? scenario.why : (revCount >= 3 ? '连续修改达到 3 轮，建议升级为全审计。' : '当前可先保持轻审计。');
+
+  // Project card
+  const projectCard = document.getElementById('m-project-card');
+  projectCard.style.display = 'block';
+  const projectRows = [
+    { label:'Project', value: auditLog?.project_id || info['项目名'] || info['项目'] || '未命名项目' },
+    { label:'Mode', html: badge(state.artifacts?.mode || 'system-build', state.artifacts?.mode === 'audit-revision' ? 'accent' : 'locked') },
+    { label:'Core Files', html: state.artifacts?.coreComplete ? badge('完整', 'done') : badge('未完整', 'pending') },
+    { label:'Last Full', value: formatTs(auditLog?.last_full_audit_at) },
+    { label:'Rev Count', value: String(revCount) },
+    { label:'Primary', html: '<code>design-tokens.css</code>' },
+  ];
+  document.getElementById('m-project-table').innerHTML = renderMiniTable(projectRows);
+
+  // Scenario card
+  const scenarioCard = document.getElementById('m-scenario-card');
+  scenarioCard.style.display = 'block';
+  document.getElementById('m-scenario-table').innerHTML = renderMiniTable([
+    { label:'Scenario', html: badge(scenario.label, scenario.full ? 'fail' : 'accent') },
+    { label:'Risk', html: badge(scenario.risk, scenario.risk.includes('高') ? 'fail' : scenario.risk.includes('中') ? 'pending' : 'done') },
+    { label:'Why', value: scenario.why },
+    { label:'Scope Hint', value: auditLog?.current_scope || auditLog?.scenario_hint || '未提供，当前基于文件变更和会话状态推断' },
+  ]);
+
+  // Change card
+  const changeCard = document.getElementById('m-change-card');
+  changeCard.style.display = 'block';
+  document.getElementById('m-change-table').innerHTML = renderMiniTable([
+    { label:'File', value: state.lastChange?.file || 'initial-load' },
+    { label:'At', value: formatTs(state.lastChange?.at || state.audit?.timestamp) },
+    { label:'Page', value: auditLog?.current_page || 'home / unknown' },
+    { label:'Need Full', html: requireFull ? badge('YES', 'fail') : badge('NO', 'done') },
+    { label:'Reason', value: fullReason },
+    { label:'Open Issues', value: String((auditLog?.open_issues || []).length) },
+  ]);
+
+  // Drift card
+  const driftCard = document.getElementById('m-drift-card');
+  driftCard.style.display = 'block';
+  document.getElementById('m-drift-table').innerHTML = renderMiniTable(buildDriftRows(scenario, auditLog));
+
+  // Context card
+  const contextCard = document.getElementById('m-context-card');
+  contextCard.style.display = 'block';
+  document.getElementById('m-context-table').innerHTML = renderMiniTable(buildContextRows(scenario, auditLog));
+}
+
+function renderMonitor() {
+  const files = getActiveFiles();
+  const hasAny = WATCHED.some(f => files[f]);
+  document.getElementById('monitor-content').style.display = 'block';
+  document.getElementById('monitor-empty').style.display = hasAny ? 'none' : 'block';
+  document.getElementById('monitor-data-wrap').style.display = hasAny ? 'block' : 'none';
+  if (!hasAny) { updateSessionMeta(); return; }
+
+  // Stage tracker
+  const stage = inferStage(files, getActiveArtifacts(), state.audit);
+  updateStageTimeline(document.getElementById('monitor-stage-timeline'), stage);
+
+  // Mode card
+  const modeCard = document.getElementById('m-mode-card');
+  const activeArtifacts = getActiveArtifacts();
+  if (activeArtifacts) {
+    modeCard.style.display = 'block';
+    const modeMap = {
+      'system-build': ['System Build Mode', '从零生成设计规范系统，再映射为 HTML'],
+      'partial-audit': ['Partial Audit Mode', '已检测到部分交付物，优先补读并局部审计'],
+      'audit-revision': ['Audit / Revision Mode', '已检测到完整交付物，直接审计与修订，不重跑上游流程'],
+    };
+    const [title, subtitle] = modeMap[activeArtifacts.mode] || ['Unknown Mode', ''];
+    document.getElementById('m-mode-title').textContent = title;
+    document.getElementById('m-mode-subtitle').textContent = subtitle;
+    document.getElementById('m-mode-pill').textContent = (activeArtifacts.mode || 'MODE').toUpperCase();
+    document.getElementById('m-primary-artifact').textContent = activeArtifacts.primaryArtifact || 'design-tokens.css';
+  } else {
+    modeCard.style.display = 'none';
+  }
+
+  renderScenarioPanels();
+
+  // Artifacts
+  const artEl = document.getElementById('m-artifacts');
+  artEl.innerHTML = WATCHED.map(f => {
+    const exists = !!files[f];
+    return `<div class="spec-file-status">
+      <span class="file-dot ${exists ? 'exists' : 'missing'}"></span>
+      <span class="file-name" style="font-family:var(--font-mono);font-size:12px;flex:1">${f}</span>
+      <span class="pill ${exists ? 'pill-done' : 'pill-pending'}">${exists ? 'Found' : 'Missing'}</span>
+    </div>`;
+  }).join('');
+
+  // Progress
+  const ready = WATCHED.filter(f => files[f]).length;
+  const pct = Math.round((ready / WATCHED.length) * 100);
+  document.getElementById('m-progress').style.width = pct + '%';
+  document.getElementById('m-progress-label').textContent = `${ready}/${WATCHED.length}`;
+
+  // Decisions
+  const info = parseHtmlcraftMD(files['.htmlcraft.md']);
+  const decCard = document.getElementById('m-decisions-card');
+  if (info && Object.keys(info).length > 0) {
+    decCard.style.display = 'block';
+    document.getElementById('m-decisions').innerHTML = Object.entries(info).map(([k, v]) => {
+      const swatch = resolveTokenDisplay(v);
+      return `<div class="token-row">
+        <span class="token-name">${swatch}${k}</span>
+        <span class="token-value">${v}</span>
+      </div>`;
+    }).join('');
+  } else {
+    decCard.style.display = 'none';
+  }
+
+  // Tokens
+  const tokens = parseTokensCSS(files['design-tokens.css']);
+  const tokCard = document.getElementById('m-tokens-card');
+  if (Object.keys(tokens).length > 0) {
+    tokCard.style.display = 'block';
+    const cats = categorizeTokens(tokens);
+    const groupLabels = { colors:'颜色', type:'排版', spacing:'间距', components:'组件', other:'其他' };
+    let html = '';
+    for (const [group, items] of Object.entries(cats)) {
+      if (Object.keys(items).length === 0) continue;
+      html += `<div style="font-size:11px;font-weight:700;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.06em;margin:var(--space-4) 0 var(--space-2);padding-top:var(--space-3);border-top:1px solid var(--color-border)">${groupLabels[group] || group}</div>`;
+      for (const [k, v] of Object.entries(items)) {
+        const swatch = resolveTokenDisplay(v);
+        html += `<div class="token-row">
+          <span class="token-name">${swatch}--${k}</span>
+          <span class="token-value">${v}</span>
+        </div>`;
+      }
+    }
+    document.getElementById('m-tokens').innerHTML = html;
+  } else {
+    tokCard.style.display = 'none';
+  }
+
+  // Audit
+  const auditCard = document.getElementById('m-audit-card');
+  if (state.audit) {
+    auditCard.style.display = 'block';
+    const h = state.audit.heuristics || {};
+    const s = state.audit.summary || {};
+
+    const passed = (h.strengths || []).length;
+    const total = passed + (h.issues || []).length;
+    const trigger = state.audit.trigger ? ` · 触发：${state.audit.trigger}` : '';
+    const mode = state.audit.artifacts && state.audit.artifacts.mode ? ` · 模式：${state.audit.artifacts.mode}` : '';
+    document.getElementById('m-audit-subtitle').textContent = `${passed}/${total} 项通过${trigger}${mode}`;
+
+    // Sections
+    if (s.sections && s.sections.length > 0) {
+      document.getElementById('m-audit-sections').style.display = 'block';
+      document.getElementById('m-sections-list').innerHTML = s.sections.map(sec =>
+        `<span class="pill pill-locked">${sec}</span>`
+      ).join('');
+    }
+
+    // Headings
+    if (s.headings && s.headings.length > 0) {
+      document.getElementById('m-audit-headings').style.display = 'block';
+      document.getElementById('m-headings-list').innerHTML = s.headings.map(h =>
+        `<div class="token-row" style="padding:6px 0">
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--color-muted);flex-shrink:0;width:32px">${h.level.toUpperCase()}</span>
+          <span style="font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.text}</span>
+        </div>`
+      ).join('');
+    }
+
+    // CTA
+    if (s.cta_texts && s.cta_texts.length > 0) {
+      document.getElementById('m-audit-cta').style.display = 'block';
+      document.getElementById('m-cta-list').innerHTML = s.cta_texts.map(t =>
+        `<span class="pill pill-accent">${t}</span>`
+      ).join('');
+    }
+
+    // Strengths + Issues
+    const items = [
+      ...(h.strengths || []).map(s => ({ pass: true, text: s })),
+      ...(h.issues || []).map(s => ({ pass: false, text: s })),
+    ];
+    document.getElementById('m-audit').innerHTML = items.map(item => `
+      <div class="row">
+        <div class="row-icon" style="background:${item.pass ? 'var(--color-done-bg)' : 'var(--color-fail-bg)'};color:${item.pass ? 'var(--color-done)' : 'var(--color-fail)'};border-color:${item.pass ? '#bbf7d0' : '#fecaca'}">
+          ${item.pass ? '✓' : '✗'}
+        </div>
+        <div class="row-content">
+          <div class="row-label" style="color:${item.pass ? 'var(--color-text)' : 'var(--color-fail)'}">${item.text}</div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    auditCard.style.display = 'none';
+  }
+}
+
+function renderSpec() {
+  const tokens = parseTokensCSS(files['design-tokens.css']);
+  const hasTokens = Object.keys(tokens).length > 0;
+  const hasConstraints = !!state.files['.htmlcraft.md'];
+  const hasAny = hasTokens || hasConstraints;
+
+  document.getElementById('spec-empty').style.display = hasAny ? 'none' : 'block';
+  document.getElementById('spec-content').style.display = hasAny ? 'block' : 'none';
+  if (!hasAny) return;
+
+  // File status
+  document.getElementById('s-files').innerHTML = WATCHED.map(f => {
+    const exists = !!files[f];
+    return `<div class="spec-file-status">
+      <span class="file-dot ${exists ? 'exists' : 'missing'}"></span>
+      <span class="file-name" style="font-family:var(--font-mono);font-size:12px;flex:1">${f}</span>
+      <span class="pill ${exists ? 'pill-done' : 'pill-pending'}">${exists ? 'Found' : 'Missing'}</span>
+    </div>`;
+  }).join('');
+
+  if (!hasTokens) {
+    if (hasConstraints) {
+      document.getElementById('s-constraints-card').style.display = 'block';
+      document.getElementById('s-constraints').textContent = files['.htmlcraft.md'];
+    }
+    return;
+  }
+
+  const cats = categorizeTokens(tokens);
+
+  // Colors + contrast
+  const colCard = document.getElementById('s-colors-card');
+  const colorEntries = Object.entries(cats.colors).filter(([,v]) => isColor(v) || v.startsWith('var('));
+  if (colorEntries.length > 0) {
+    colCard.style.display = 'block';
+
+    // Resolve var() references for display
+    function resolveColor(v) {
+      const m = v.match(/var\(--([\w-]+)\)/);
+      if (m && tokens[m[1]]) return tokens[m[1]];
+      return v;
+    }
+
+    document.getElementById('s-colors').innerHTML = colorEntries.map(([k, v]) => {
+      const displayColor = resolveColor(v);
+      return `<div class="palette-item">
+        <div class="palette-swatch" style="background:${displayColor}"></div>
+        <div class="palette-info">
+          <div class="palette-name">--${k}</div>
+          <div class="palette-value">${v}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Contrast check
+    const bgVal = resolveColor(tokens['color-bg'] || tokens['bg'] || '');
+    const fgVal = resolveColor(tokens['color-text'] || tokens['color-fg'] || tokens['fg'] || '');
+    const accentVal = resolveColor(tokens['color-primary'] || tokens['color-accent'] || '');
+    const mutedVal = resolveColor(tokens['color-text-muted'] || tokens['color-muted'] || '');
+
+    if (bgVal && fgVal && isColor(bgVal) && isColor(fgVal)) {
+      document.getElementById('s-contrast').style.display = 'block';
+      const pairs = [
+        { label: '正文 (--color-text) on 底色 (--color-bg)', fg: fgVal, bg: bgVal, min: 4.5, role: 'body' },
+        ...(accentVal && isColor(accentVal) ? [{ label: 'Accent on 底色', fg: accentVal, bg: bgVal, min: 3, role: 'large' }] : []),
+        ...(mutedVal && isColor(mutedVal) ? [{ label: '辅助文字 (--color-muted) on 底色', fg: mutedVal, bg: bgVal, min: 4.5, role: 'body' }] : []),
+      ];
+      document.getElementById('s-contrast-list').innerHTML = pairs.map(p => {
+        const ratio = contrastRatio(p.fg, p.bg);
+        const pass = ratio !== null && parseFloat(ratio) >= p.min;
+        return `<div class="compliance-item">
+          <span class="compliance-icon">${pass ? '✅' : '⚠️'}</span>
+          <div class="compliance-text">
+            <div class="compliance-rule">${ratio ? ratio + ':1' : 'N/A'} — ${pass ? 'Pass' : 'Fail'}</div>
+            <div class="compliance-detail">${p.label} (要求 ≥ ${p.min}:1)</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  } else {
+    colCard.style.display = 'none';
+  }
+
+  // Typography
+  const typeCard = document.getElementById('s-type-card');
+  if (Object.keys(cats.type).length > 0) {
+    typeCard.style.display = 'block';
+    document.getElementById('s-type').innerHTML = Object.entries(cats.type).map(([k, v]) => {
+      let preview = '';
+      if (k.startsWith('text-') && /^\d+px$/.test(v)) {
+        preview = `<span style="font-size:${v};line-height:1.2;font-weight:600;color:var(--color-text)">Aa</span>`;
+      }
+      return `<div class="token-row">
+        <span class="token-name" style="font-family:var(--font-mono)">--${k}</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          ${preview}
+          <span class="token-value">${v}</span>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    typeCard.style.display = 'none';
+  }
+
+  // Spacing
+  const spCard = document.getElementById('s-spacing-card');
+  const spaceEntries = Object.entries(cats.spacing).filter(([k]) => k.startsWith('space-'));
+  if (spaceEntries.length > 0) {
+    spCard.style.display = 'block';
+    const maxPx = Math.max(...spaceEntries.map(([,v]) => parseInt(v) || 0), 1);
+    document.getElementById('s-spacing').innerHTML = spaceEntries.map(([k, v]) => {
+      const px = parseInt(v) || 0;
+      const w = Math.max(6, (px / maxPx) * 260);
+      return `<div class="spacing-bar-row">
+        <span class="spacing-bar-label">--${k}</span>
+        <div class="spacing-bar" style="width:${w}px"></div>
+        <span class="spacing-bar-value">${v}</span>
+      </div>`;
+    }).join('');
+  } else {
+    spCard.style.display = 'none';
+  }
+
+  // Components
+  const compCard = document.getElementById('s-components-card');
+  if (Object.keys(cats.components).length > 0) {
+    compCard.style.display = 'block';
+    document.getElementById('s-components').innerHTML = Object.entries(cats.components).map(([k, v]) => {
+      const swatch = isColor(v) ? `<span class="color-swatch" style="background:${v}"></span>` : '';
+      return `<div class="token-row">
+        <span class="token-name" style="font-family:var(--font-mono)">${swatch}--${k}</span>
+        <span class="token-value">${v}</span>
+      </div>`;
+    }).join('');
+  } else {
+    compCard.style.display = 'none';
+  }
+
+  // Compliance
+  const complianceCard = document.getElementById('s-compliance-card');
+  const results = runComplianceCheck(tokens);
+  if (results.length > 0) {
+    complianceCard.style.display = 'block';
+    document.getElementById('s-compliance').innerHTML = results.map(r => `
+      <div class="compliance-item">
+        <span class="compliance-icon">${r.pass ? '✅' : '❌'}</span>
+        <div class="compliance-text">
+          <div class="compliance-rule">${r.rule}</div>
+          <div class="compliance-detail">${r.detail}</div>
+        </div>
+        <span class="pill ${r.pass ? 'pill-done' : 'pill-fail'}">${r.pass ? 'Pass' : 'Fail'}</span>
+      </div>
+    `).join('');
+  } else {
+    complianceCard.style.display = 'none';
+  }
+
+  // Constraints
+  const conCard = document.getElementById('s-constraints-card');
+  if (hasConstraints) {
+    conCard.style.display = 'block';
+    document.getElementById('s-constraints').textContent = files['.htmlcraft.md'];
+  } else {
+    conCard.style.display = 'none';
+  }
+}
+
+function renderAll() {
+  const info = parseHtmlcraftMD(files['.htmlcraft.md']);
+  if (info) {
+    const name = info['项目名'] || info['project_name'] || info['项目'];
+    if (name) document.getElementById('project-name').innerHTML = `HTML<em style="font-style:normal;color:var(--color-accent)">${name}</em>`;
+  }
+  renderMonitor();
+  renderSpec();
+  updateSessionMeta();
+}
+
+// ════════════════════════════════════════
+//  WebSocket
+// ════════════════════════════════════════
+let ws, reconnectTimer;
+
+function connect() {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${protocol}//${location.host}`);
+
+  ws.onopen = () => {
+    document.getElementById('ws-dot').className = 'status-dot connected';
+    document.getElementById('ws-label').textContent = 'CONNECTED';
+  };
+
+  ws.onclose = () => {
+    document.getElementById('ws-dot').className = 'status-dot disconnected';
+    document.getElementById('ws-label').textContent = 'RECONNECTING';
+    reconnectTimer = setTimeout(connect, 2000);
+  };
+
+  ws.onerror = () => ws.close();
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'init') {
+      state.files = msg.files || {};
+      renderAll();
+    }
+    if (msg.type === 'update') {
+      state.files[msg.file] = msg.content;
+      state.lastChange = { file: msg.file, at: new Date().toISOString() };
+      state.history.push(state.lastChange);
+      if (state.history.length > 20) state.history = state.history.slice(-20);
+      persistSnapshot();
+      renderAll();
+    }
+    if (msg.type === 'artifact_scan') {
+      state.artifacts = msg.data;
+      persistSnapshot();
+      renderAll();
+    }
+    if (msg.type === 'audit') {
+      state.audit = msg.data;
+      persistSnapshot();
+      renderAll();
+    }
+  };
+}
+
+setupLocalControls();
+restoreSnapshot();
+window.addEventListener('beforeunload', persistSnapshot);
+connect();
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "skill_name": "guided-html-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Help me design and build a landing page for an AI writing tool called InkFlow. It should feel premium and minimal, targeting professional writers. I want signup conversion.",
+      "expected_output": "The assistant should run the full guided flow: warm-up, intake, propose 2-3 directions with visual theses, confirm rhythm/typography/color/components layer by layer, generate spec artifacts, then build HTML in chunks with verification."
+    },
+    {
+      "id": 2,
+      "prompt": "做一个科技感的产品发布页，产品叫 NeuralOS，是一个 AI 操作系统。暗色调，要酷一点。",
+      "expected_output": "The assistant should handle Chinese input naturally, propose a tech/futuristic visual thesis, select appropriate Chinese+English bilingual typography strategy, use dark color tokens, and follow the product launch page template rhythm."
+    },
+    {
+      "id": 3,
+      "prompt": "I have a portfolio site I want to redesign. Here's my current site: [screenshot]. I want something that feels like a magazine but for a UX designer. Editorial vibe.",
+      "expected_output": "The assistant should analyze the reference screenshot for signals (spacing density, type mood, color temperature, layout), propose editorial directions with serif typography, and choose a portfolio page template with editorial rhythm."
+    },
+    {
+      "id": 4,
+      "prompt": "Build me a SaaS landing page. Make it look good.",
+      "expected_output": "The assistant should NOT jump to code. It should recognize the vague input, ask one focused clarifying question (page goal, audience, or style preference), propose default direction with stated assumptions, and proceed through the guided flow."
+    },
+    {
+      "id": 5,
+      "prompt": "I already have a design spec from another tool. Here are my tokens: primary #2563eb, bg #0f172a, font Inter. Just build the HTML page with these sections: hero, features (4 items), testimonials, pricing, CTA.",
+      "expected_output": "The assistant should respect the existing tokens, import them as CSS variables, follow the specified section order, but still apply component consistency rules, spacing system, and anti-slop constraints from the skill."
+    },
+    {
+      "id": 6,
+      "prompt": "I want a landing page for a local bakery. Warm, friendly, makes you want to visit. Nothing too techy.",
+      "expected_output": "The assistant should propose warm/friendly visual thesis, use rounded sans-serif fonts (Nunito or similar), warm color palette, generous spacing. Hero should use photography-led approach. Should NOT default to dark tech aesthetic."
+    },
+    {
+      "id": 7,
+      "prompt": "We're launching a developer conference called DevForge 2026 in Tokyo. Need a registration page. Should feel bold and energetic but also organized.",
+      "expected_output": "The assistant should use the event/conference page template, propose bold or tech direction with event-appropriate energy, include speaker grid, schedule overview, venue section, and registration CTA. Should handle the tension between bold energy and organizational clarity."
+    },
+    {
+      "id": 8,
+      "prompt": "I'm using Claude Code for this project but my teammate uses Cursor and another uses Codex. We need the design to stay consistent across all three tools. Can you set up the design system for that?",
+      "expected_output": "The assistant should explicitly reference cross-model-consistency.md, generate all three spec files (md, json, css), explain token file sovereignty, and provide installation instructions for all three environments."
+    }
+  ]
+}

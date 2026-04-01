@@ -1,0 +1,107 @@
+# Corpus Status
+
+Current sweep snapshot for the checked-in canaries.
+
+This is the compact status page. Historical reasoning, failed experiments, and
+why the numbers moved live in `RESEARCH.md`. The shared mismatch vocabulary now
+lives in `TAXONOMY.md`. Current machine-readable representative rows live in
+`representative.json`.
+
+Conventions:
+- "anchors" means `300 / 600 / 800` unless noted otherwise
+- "sampled" usually means `--samples=9`
+- "step=10" means `300..900`
+- values are the last recorded results on this machine, not a claim of universal permanence
+
+## Browser Regression Gate
+
+| Sweep | Status |
+|---|---|
+| Official browser corpus (Chrome) | `7680/7680` |
+| Official browser corpus (Safari) | `7680/7680` |
+| Official browser corpus (Firefox) | `7680/7680` |
+
+## Product-Shaped Canary
+
+| Corpus | Chrome anchors | Chrome step=10 | Notes |
+|---|---:|---:|---|
+| `mixed-app-text` | exact at `300 / 600 / 800` | `60/61 exact` | remaining Chrome-only `710px` miss is SHY / extractor-sensitive; Safari is exact there again in height/line count |
+
+## Long-Form Corpora
+
+| Corpus | Language | Chrome anchors | Safari anchors | Chrome sampled | Chrome step=10 | Notes |
+|---|---|---:|---:|---:|---:|---|
+| `ja-kumo-no-ito` | Japanese | exact | exact | `8/9 exact` | `56/61 exact` | second Japanese canary; same broad one-line positive edge-fit field as `羅生門`, but smaller |
+| `ja-rashomon` | Japanese | exact | exact | `4/9 exact` | `54/61 exact` | real Japanese canary; remaining field is mostly opening-quote / punctuation compression plus a few one-line edge fits |
+| `ko-unsu-joh-eun-nal` | Korean | exact | not recently rerun | n/a | `61/61 exact` | Korean coarse corpus is clean |
+| `zh-guxiang` | Chinese | exact at `600 / 800`, `+64px` at `300` | exact | `6/9 exact` | `53/61 exact` | second Chinese canary; same Chrome-positive / Safari-clean split as `祝福`, but slightly healthier overall |
+| `zh-zhufu` | Chinese | exact at `600 / 800`, `+32px` at `300` | exact | `7/9 exact` | `44/61 exact` | real Chinese canary; broad positive one-line field in Chrome, exact Safari anchors |
+| `th-nithan-vetal-story-1` | Thai | exact at key sentinels after fixes | exact | n/a | `59/61 exact` | two remaining coarse one-line misses |
+| `th-nithan-vetal-story-7` | Thai | exact | exact | `9/9 exact` | not fully rerun | second Thai canary stays healthy |
+| `km-prachum-reuang-preng-khmer-volume-7-stories-1-10` | Khmer | exact | exact | `9/9 exact` | not fully rerun | full `step=10` is slower; sampled check is the preferred first pass |
+| `my-cunning-heron-teacher` | Myanmar | exact | exact at anchors | `9/9 exact` | `56/61 exact` | real residual Myanmar canary; quote/follower and phrase-break classes remain |
+| `my-bad-deeds-return-to-you-teacher` | Myanmar | exact | exact | `8/9 exact` | `57/61 exact` | healthier than the first Myanmar text, but still shows the same broad quote+follower class in Chrome |
+| `ur-chughd` | Urdu | exact at `600 / 800`, `-76px` at `300` | exact at `600 / 800`, `-76px` at `300` | `4/9 exact` | `31/61 exact` | real Nastaliq/Naskh canary; broad negative field at narrow widths and local shaping/context drift |
+| `hi-eidgah` | Hindi | exact | exact | n/a | `61/61 exact` | Hindi coarse corpus is clean |
+| `ar-risalat-al-ghufran-part-1` | Arabic | exact | exact at key sentinels | n/a | `61/61 exact` | Arabic coarse corpus is clean; fine sweep still has a small positive one-line field |
+| `ar-al-bukhala` | Arabic | exact | exact at anchors | not recently rerun | not fully rerun | large second Arabic canary; anchors are clean |
+| `he-masaot-binyamin-metudela` | Hebrew | exact | exact | n/a | `61/61 exact` | Hebrew coarse corpus is clean |
+
+## Fine-Sweep Notes
+
+These are the main "harder than coarse step=10" canaries worth remembering.
+
+| Corpus | Result | Notes |
+|---|---:|---|
+| `ar-risalat-al-ghufran-part-1` | `594/601 exact` | remaining misses are one-line positive edge-fit cases |
+| `my-cunning-heron-teacher` | not fully mapped at `step=1` | current useful sentinels are the shared `350` and `690` classes |
+| `ur-chughd` | not fully mapped at `step=1` | first narrow-width mismatch shows real local width/context drift, not dirty data |
+
+## Font Matrix Notes
+
+These are sampled, not exhaustive.
+
+| Corpus | Status | Notes |
+|---|---|---|
+| `ja-kumo-no-ito` | sampled matrix has a small field | `Hiragino Mincho ProN` had `+32px` at `450px`; `Hiragino Sans` was `5/5 exact` |
+| `ja-rashomon` | sampled matrix has small field | `Hiragino Mincho ProN` was `3/5 exact`; `Hiragino Sans` improved to `4/5 exact`, but `450px` still missed |
+| `ko-unsu-joh-eun-nal` | clean on sampled matrix | `Apple SD Gothic Neo`, `AppleMyungjo` |
+| `zh-guxiang` | sampled matrix has a real font split | `Songti SC` had `+64px` at `300` and `+32px` at `450`; `PingFang SC` improved `450` but still missed `300` |
+| `zh-zhufu` | sampled matrix has a real font split | `Songti SC` was `3/5 exact`; `PingFang SC` widened the positive field to `300 / 450 / 600` |
+| `th-nithan-vetal-story-1` | clean on sampled matrix | `Thonburi`, `Ayuthaya` |
+| `th-nithan-vetal-story-7` | clean on sampled matrix | `Thonburi`, `Ayuthaya` |
+| `km-prachum-reuang-preng-khmer-volume-7-stories-1-10` | clean on sampled matrix | `Khmer Sangam MN`, `Khmer MN` |
+| `hi-eidgah` | clean on sampled matrix | `Kohinoor Devanagari`, `Devanagari Sangam MN`, `ITF Devanagari` |
+| `ar-risalat-al-ghufran-part-1` | clean on sampled matrix | `Geeza Pro`, `SF Arabic`, `Arial` |
+| `he-masaot-binyamin-metudela` | clean on sampled matrix | `Times New Roman`, `SF Hebrew` |
+| `my-cunning-heron-teacher` | clean on sampled matrix | `Myanmar MN`, `Myanmar Sangam MN`, `Noto Sans Myanmar` |
+| `my-bad-deeds-return-to-you-teacher` | one sampled miss | `Myanmar Sangam MN` had `-32px` at `300px`; `Myanmar MN` and `Noto Sans Myanmar` stayed exact |
+| `ur-chughd` | sampled matrix has a real narrow field | `Noto Nastaliq Urdu` was `2/5 exact`; `Geeza Pro` improved to `3/5 exact` but kept the same narrow negative field |
+
+## Recompute
+
+Useful commands:
+
+```sh
+bun run corpus-taxonomy --id=ja-rashomon 330 450
+bun run corpus-taxonomy --id=zh-zhufu 300 450
+bun run corpus-taxonomy --id=ur-chughd 300 340 600
+bun run corpus-check --id=ko-unsu-joh-eun-nal 300 600 800
+bun run corpus-check --id=ja-kumo-no-ito 300 600 800
+bun run corpus-check --id=ja-rashomon 300 600 800
+bun run corpus-check --id=zh-guxiang 300 600 800
+bun run corpus-check --id=zh-zhufu 300 600 800
+bun run corpus-sweep --id=zh-guxiang --start=300 --end=900 --step=10
+bun run corpus-sweep --id=ja-kumo-no-ito --start=300 --end=900 --step=10
+bun run corpus-sweep --id=ja-rashomon --start=300 --end=900 --step=10
+bun run corpus-sweep --id=zh-zhufu --start=300 --end=900 --step=10
+bun run corpus-font-matrix --id=zh-guxiang --samples=5
+bun run corpus-sweep --id=my-cunning-heron-teacher --start=300 --end=900 --step=10
+bun run corpus-sweep --id=my-bad-deeds-return-to-you-teacher --samples=9
+bun run corpus-font-matrix --id=zh-zhufu --samples=5
+bun run corpus-check --id=ur-chughd 300 600 800
+bun run corpus-sweep --id=ur-chughd --start=300 --end=900 --step=10
+bun run corpus-font-matrix --id=my-bad-deeds-return-to-you-teacher --samples=5
+bun run corpus-font-matrix --id=ur-chughd --samples=5
+bun run corpus-representative
+```

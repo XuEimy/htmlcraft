@@ -1,0 +1,13 @@
+{
+  "name": "htmlcraft-dashboard",
+  "version": "1.0.0",
+  "description": "HTMLCraft real-time design system dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js --open"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

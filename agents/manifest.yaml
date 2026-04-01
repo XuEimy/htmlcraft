@@ -1,0 +1,38 @@
+name: htmlcraft
+description: HTMLCraft — Guided HTML design system for webpages, reports, and slide decks with aesthetic precision.
+version: "2.0"
+author: HTMLCraft
+
+trigger:
+  commands:
+    - "/htmlcraft"
+    - "/using htmlcraft"
+  keywords:
+    - "design a webpage"
+    - "HTML landing page"
+    - "HTML report"
+    - "HTML PPT"
+    - "HTML presentation"
+
+model_compatibility:
+  - openai/gpt-4o
+  - openai/gpt-4-turbo
+  - anthropic/claude-opus-4
+  - anthropic/claude-sonnet-4-5
+  - google/gemini-2.5-pro
+  - google/gemini-2.0-flash
+  - meta/llama-3.1-70b
+  - mistral/mistral-large
+
+interface:
+  display_name: "HTMLCraft"
+  short_description: "Guided HTML design: webpages, reports, PPT — with design system lock-in"
+  default_prompt: "Use /htmlcraft to design an HTML page through PRD confirmation, visual direction, design system, and staged code generation."
+
+capabilities:
+  - html_generation
+  - design_system
+  - responsive_layout
+  - css_tokens
+  - ppt_slides
+  - html_reports
